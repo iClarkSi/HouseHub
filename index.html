@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Controle Doméstico</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f7f7f7;
+        color: #222;
+        max-width: 600px;
+        margin: auto;
+      }
+      input, button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        box-sizing: border-box;
+      }
+      button {
+        background: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #43a047;
+      }
+      #login, #logout {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Controle Doméstico</h1>
+
+    <button id="login">Entrar com Google</button>
+    <button id="logout" style="display:none;">Sair</button>
+
+    <div id="conteudo" style="display:none;">
+      <h2>Adicionar Groceries</h2>
+      <form id="groceriesForm">
+        <input type="text" id="gName" placeholder="Name" required />
+        <input type="text" id="gType" placeholder="Type" required />
+        <input type="date" id="gDate" required />
+        <input type="text" id="gTotalCost" placeholder="Total Cost" required />
+        <button type="submit">Adicionar</button>
+      </form>
+
+      <h2>Adicionar Product</h2>
+      <form id="productsForm">
+        <input type="text" id="pName" placeholder="Name" required />
+        <input type="text" id="pCategory" placeholder="Category" required />
+        <input type="text" id="pFullPrice" placeholder="Full Price" required />
+        <input type="number" id="pAmount" placeholder="Amount" required />
+        <input type="text" id="pAmountUnit" placeholder="Amount Unit" required />
+        <input type="text" id="pUnitPrice" placeholder="Unit Price" required />
+        <input type="text" id="pCheck" placeholder="Check" required />
+        <input type="date" id="pGroceryDate" required />
+        <button type="submit">Adicionar</button>
+      </form>
+
+      <p id="status"></p>
+    </div>
+
+    <script>
+      const CLIENT_ID = "1030002931432-lkae2h3ja2muhep356tc8bd91utiot4h.apps.googleusercontent.com";
+      const SCOPES = "https://www.googleapis.com/auth/userinfo.email";
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxm5R7_UyCdjlunfWboEIlQGNsWwbe6vxycDFQFqmA1czMY6wAQ2qoSOZ-4rW2z8xUhKQ/exec";
+
+      function handleClientLoad() {
+        gapi.load("client:auth2", initClient);
+      }
+
+      function initClient() {
+        gapi.client.init({
+          clientId: CLIENT_ID,
+          scope: SCOPES,
+        }).then(() => {
+          const auth = gapi.auth2.getAuthInstance();
+          document.getElementById("login").onclick = () => auth.signIn();
+          document.getElementById("logout").onclick = () => auth.signOut();
+          auth.isSignedIn.listen(updateSigninStatus);
+          updateSigninStatus(auth.isSignedIn.get());
+        });
+      }
+
+      function updateSigninStatus(isSignedIn) {
+        if (isSignedIn) {
+          document.getElementById("login").style.display = "none";
+          document.getElementById("logout").style.display = "block";
+          document.getElementById("conteudo").style.display = "block";
+        } else {
+          document.getElementById("login").style.display = "block";
+          document.getElementById("logout").style.display = "none";
+          document.getElementById("conteudo").style.display = "none";
+        }
+      }
+
+      async function sendData(action, body) {
+        const user = gapi.auth2.getAuthInstance().currentUser.get();
+        const token = user.getAuthResponse().id_token;
+
+        const payload = { ...body, action, token };
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        document.getElementById("status").innerText = data.result || data.error || "Erro desconhecido";
+      }
+
+      document.getElementById("groceriesForm").onsubmit = (e) => {
+        e.preventDefault();
+        sendData("addGroceries", {
+          name: gName.value,
+          type: gType.value,
+          date: gDate.value,
+          totalCost: gTotalCost.value,
+        });
+        e.target.reset();
+      };
+
+      document.getElementById("productsForm").onsubmit = (e) => {
+        e.preventDefault();
+        sendData("addProduct", {
+          name: pName.value,
+          category: pCategory.value,
+          fullPrice: pFullPrice.value,
+          amount: pAmount.value,
+          amountUnit: pAmountUnit.value,
+          unitPrice: pUnitPrice.value,
+          check: pCheck.value,
+          groceryDate: pGroceryDate.value,
+        });
+        e.target.reset();
+      };
+
+      handleClientLoad();
+    </script>
+  </body>
+</html>
