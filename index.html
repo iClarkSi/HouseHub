@@ -56,7 +56,7 @@
 <script type="module">
   import { initializeFirebase } from "./js/utils.js";
 
-  initializeFirebase();
+  const { auth, db, provider } = initializeFirebase();
 
   // Login / Logout
   document.getElementById("login").onclick = async () => { try { await auth.signInWithPopup(provider); } catch(e){ alert(e.message); } };
