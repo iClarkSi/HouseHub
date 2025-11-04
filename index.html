@@ -104,21 +104,29 @@ button:hover { background: #43a047; }
   }
 
   // Submit Groceries
-  try {
-    const dateValue = document.getElementById("gDate").value;
-    const totalCostValue = document.getElementById("gTotalCost").value;
+  document.getElementById("groceriesForm").onsubmit = async (e) => {
+    e.preventDefault(); // previne envio padrão do form
 
-    if(!dateValue || !totalCostValue) throw new Error("Preencha todos os campos obrigatórios");
+    try {
+      const dateValue = document.getElementById("gDate").value;
+      const totalCostValue = document.getElementById("gTotalCost").value;
 
-    await db.collection("Groceries").add({
-      name: document.getElementById("gName").value.trim(),
-      type: document.getElementById("gType").value,
-      date: toTimestamp(dateValue),
-      totalCostCents: parseCurrency(totalCostValue)
-    });
-  } catch(err) {
-    document.getElementById("status").innerText = "Erro: "+err.message;
-  }
+      if (!dateValue || !totalCostValue) throw new Error("Preencha todos os campos obrigatórios");
+
+      await db.collection("Groceries").add({
+        name: document.getElementById("gName").value.trim(),
+        type: document.getElementById("gType").value,
+        date: toTimestamp(dateValue),
+        totalCostCents: parseCurrency(totalCostValue)
+      });
+
+      document.getElementById("status").innerText = "Groceries adicionada!";
+      e.target.reset();
+    } catch (err) {
+      document.getElementById("status").innerText = "Erro: " + err.message;
+    }
+  };
+
 
   // Submit Products
   document.getElementById("productsForm").onsubmit = async (e) => {
