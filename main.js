@@ -1,3 +1,4 @@
-import { initializeFirebase } from "./js/utils.js";
+import { initializeFirebase, renderPage } from "./js/utils.js";
+import { Pages } from "./js/pages/pages.js";
 
-initializeFirebase();
+renderPage("app", Pages.login);
