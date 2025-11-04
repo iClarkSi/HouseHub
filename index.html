@@ -89,7 +89,6 @@ button:hover { background: #43a047; }
 
   // Converte R$ para centavos
   function parseCurrency(value){
-    if(!value) throw new Error("Campo de moeda vazio");
     const cleaned = value.replace(/[R$\s]/g,"").replace(",",".");
     const num = parseFloat(cleaned);
     if(isNaN(num)) throw new Error("Valor inválido: "+value);
@@ -98,32 +97,28 @@ button:hover { background: #43a047; }
 
   // Converte input date para Timestamp do Firestore
   function toTimestamp(value){
+    if(!value) throw new Error("Data inválida: "+value);
     const d = new Date(value);
     if(isNaN(d.getTime())) throw new Error("Data inválida: "+value);
     return firebase.firestore.Timestamp.fromDate(d);
   }
 
   // Submit Groceries
-  document.getElementById("groceriesForm").onsubmit = async (e) => {
-    e.preventDefault();
-    const statusEl = document.getElementById("status");
+  try {
+    const dateValue = document.getElementById("gDate").value;
+    const totalCostValue = document.getElementById("gTotalCost").value;
 
-    try {
-      const groceryData = {
-        name: document.getElementById("gName").value.trim(),
-        type: document.getElementById("gType").value.trim(),
-        date: toTimestamp(document.getElementById("gDate").value),
-        totalCostCents: parseCurrency(document.getElementById("gTotalCost").value.trim())
-      };
-      console.log("Enviando Groceries:", groceryData);
-      await db.collection("Groceries").add(groceryData);
-      statusEl.innerText = "Groceries adicionada!";
-      e.target.reset();
-    } catch(err){
-      console.error(err);
-      statusEl.innerText = "Erro: "+err.message;
-    }
-  };
+    if(!dateValue || !totalCostValue) throw new Error("Preencha todos os campos obrigatórios");
+
+    await db.collection("Groceries").add({
+      name: document.getElementById("gName").value.trim(),
+      type: document.getElementById("gType").value,
+      date: toTimestamp(dateValue),
+      totalCostCents: parseCurrency(totalCostValue)
+    });
+  } catch(err) {
+    document.getElementById("status").innerText = "Erro: "+err.message;
+  }
 
   // Submit Products
   document.getElementById("productsForm").onsubmit = async (e) => {
