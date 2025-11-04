@@ -57,33 +57,27 @@ button:hover { background: #43a047; }
 </div>
 
 <script>
-  // Config Firebase (substitua pelos seus valores)
+  // ** NÃO use import aqui, apenas compat **
   const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_PROJETO.firebaseapp.com",
-    projectId: "SEU_PROJETO",
-    storageBucket: "SEU_PROJETO.appspot.com",
-    messagingSenderId: "SEU_SENDER_ID",
-    appId: "SEU_APP_ID",
-    measurementId: "SEU_MEASUREMENT_ID"
+    apiKey: "AIzaSyA_CkIgswx9DClgDIUbWJ8JBH2j8Qndbw",
+    authDomain: "househub-ba60c.firebaseapp.com",
+    projectId: "househub-ba60c",
+    storageBucket: "househub-ba60c.appspot.com",
+    messagingSenderId: "799328107995",
+    appId: "1:799328107995:web:5d469a48ed60a0e479fbfe"
   };
 
-  // Inicializa Firebase
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 
   // Login Google
   const provider = new firebase.auth.GoogleAuthProvider();
-
   document.getElementById("login").onclick = async () => {
     try { await auth.signInWithPopup(provider); }
     catch(e){ alert(e.message); }
   };
-
-  document.getElementById("logout").onclick = async () => {
-    await auth.signOut();
-  };
+  document.getElementById("logout").onclick = async () => { await auth.signOut(); };
 
   auth.onAuthStateChanged(user => {
     if(user){
@@ -97,53 +91,41 @@ button:hover { background: #43a047; }
     }
   });
 
-  // Converte R$ para centavos
-  function parseCurrency(value){
-    return Math.round(parseFloat(value.replace("R$", "").replace(",", ".")) * 100);
-  }
+  function parseCurrency(value){ return Math.round(parseFloat(value.replace("R$", "").replace(",", "."))*100); }
+  function toTimestamp(value){ return firebase.firestore.Timestamp.fromDate(new Date(value)); }
 
-  // Converte input date para Timestamp
-  function toTimestamp(value){
-    return firebase.firestore.Timestamp.fromDate(new Date(value));
-  }
-
-  // Envia Groceries
   document.getElementById("groceriesForm").onsubmit = async (e)=>{
     e.preventDefault();
     try{
       await db.collection("Groceries").add({
-        name: document.getElementById("gName").value,
-        type: document.getElementById("gType").value,
-        date: toTimestamp(document.getElementById("gDate").value),
-        totalCostCents: parseCurrency(document.getElementById("gTotalCost").value)
+        name: gName.value,
+        type: gType.value,
+        date: toTimestamp(gDate.value),
+        totalCostCents: parseCurrency(gTotalCost.value)
       });
-      document.getElementById("status").innerText = "Groceries adicionada!";
+      status.innerText = "Groceries adicionada!";
       e.target.reset();
-    } catch(err){
-      document.getElementById("status").innerText = "Erro: "+err.message;
-    }
+    } catch(err){ status.innerText = "Erro: "+err.message; }
   };
 
-  // Envia Product
   document.getElementById("productsForm").onsubmit = async (e)=>{
     e.preventDefault();
     try{
       await db.collection("Products").add({
-        name: document.getElementById("pName").value,
-        category: document.getElementById("pCategory").value,
-        fullPriceCents: parseCurrency(document.getElementById("pFullPrice").value),
-        amount: Number(document.getElementById("pAmount").value),
-        amountUnit: document.getElementById("pAmountUnit").value,
-        unitPriceCents: parseCurrency(document.getElementById("pUnitPrice").value),
-        check: document.getElementById("pCheck").checked,
-        groceryDate: toTimestamp(document.getElementById("pGroceryDate").value)
+        name: pName.value,
+        category: pCategory.value,
+        fullPriceCents: parseCurrency(pFullPrice.value),
+        amount: Number(pAmount.value),
+        amountUnit: pAmountUnit.value,
+        unitPriceCents: parseCurrency(pUnitPrice.value),
+        check: pCheck.checked,
+        groceryDate: toTimestamp(pGroceryDate.value)
       });
-      document.getElementById("status").innerText = "Product adicionado!";
+      status.innerText = "Product adicionado!";
       e.target.reset();
-    } catch(err){
-      document.getElementById("status").innerText = "Erro: "+err.message;
-    }
+    } catch(err){ status.innerText = "Erro: "+err.message; }
   };
 </script>
+
 </body>
 </html>
