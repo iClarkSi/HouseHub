@@ -26,6 +26,7 @@ button:hover { background: #43a047; }
 <button id="logout" style="display:none;">Sair</button>
 
 <div id="conteudo" style="display:none;">
+
   <h2>Adicionar Groceries</h2>
   <form id="groceriesForm">
     <input type="text" id="gName" placeholder="Name" required />
@@ -57,74 +58,97 @@ button:hover { background: #43a047; }
 </div>
 
 <script>
+  // Config Firebase do seu projeto
   const firebaseConfig = {
     apiKey: "AIzaSyA_CkIgswx9DClgDI6UbWJ8JBH2j8Qndbw",
     authDomain: "househub-ba60c.firebaseapp.com",
     projectId: "househub-ba60c",
-    storageBucket: "househub-ba60c.firebasestorage.app",
+    storageBucket: "househub-ba60c.appspot.com",
     messagingSenderId: "799328107995",
     appId: "1:799328107995:web:5d469a48ed60a0e479fbfe"
   };
 
-  // Inicializa Firebase
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
-
-
-  // Login Google
   const provider = new firebase.auth.GoogleAuthProvider();
+
+  // Login/Logout
   document.getElementById("login").onclick = async () => {
-    try { await auth.signInWithPopup(provider); }
+    try { await auth.signInWithPopup(provider); } 
     catch(e){ alert(e.message); }
   };
   document.getElementById("logout").onclick = async () => { await auth.signOut(); };
 
   auth.onAuthStateChanged(user => {
-    if(user){
-      document.getElementById("login").style.display = "none";
-      document.getElementById("logout").style.display = "block";
-      document.getElementById("conteudo").style.display = "block";
-    } else {
-      document.getElementById("login").style.display = "block";
-      document.getElementById("logout").style.display = "none";
-      document.getElementById("conteudo").style.display = "none";
-    }
+    const loggedIn = !!user;
+    document.getElementById("login").style.display = loggedIn ? "none" : "block";
+    document.getElementById("logout").style.display = loggedIn ? "block" : "none";
+    document.getElementById("conteudo").style.display = loggedIn ? "block" : "none";
   });
 
-  function parseCurrency(value){ return Math.round(parseFloat(value.replace("R$", "").replace(",", "."))*100); }
-  function toTimestamp(value){ return firebase.firestore.Timestamp.fromDate(new Date(value)); }
+  // Converte R$ para centavos
+  function parseCurrency(value){
+    if(!value) throw new Error("Campo de moeda vazio");
+    const cleaned = value.replace(/[R$\s]/g,"").replace(",",".");
+    const num = parseFloat(cleaned);
+    if(isNaN(num)) throw new Error("Valor inválido: "+value);
+    return Math.round(num*100);
+  }
 
-  document.getElementById("groceriesForm").onsubmit = async (e)=>{
+  // Converte input date para Timestamp do Firestore
+  function toTimestamp(value){
+    const d = new Date(value);
+    if(isNaN(d.getTime())) throw new Error("Data inválida: "+value);
+    return firebase.firestore.Timestamp.fromDate(d);
+  }
+
+  // Submit Groceries
+  document.getElementById("groceriesForm").onsubmit = async (e) => {
     e.preventDefault();
-    try{
-      await db.collection("Groceries").add({
-        name: gName.value,
-        type: gType.value,
-        date: toTimestamp(gDate.value),
-        totalCostCents: parseCurrency(gTotalCost.value)
-      });
-      status.innerText = "Groceries adicionada!";
+    const statusEl = document.getElementById("status");
+
+    try {
+      const groceryData = {
+        name: document.getElementById("gName").value.trim(),
+        type: document.getElementById("gType").value.trim(),
+        date: toTimestamp(document.getElementById("gDate").value),
+        totalCostCents: parseCurrency(document.getElementById("gTotalCost").value.trim())
+      };
+      console.log("Enviando Groceries:", groceryData);
+      await db.collection("Groceries").add(groceryData);
+      statusEl.innerText = "Groceries adicionada!";
       e.target.reset();
-    } catch(err){ status.innerText = "Erro: "+err.message; }
+    } catch(err){
+      console.error(err);
+      statusEl.innerText = "Erro: "+err.message;
+    }
   };
 
-  document.getElementById("productsForm").onsubmit = async (e)=>{
+  // Submit Products
+  document.getElementById("productsForm").onsubmit = async (e) => {
     e.preventDefault();
-    try{
-      await db.collection("Products").add({
-        name: pName.value,
-        category: pCategory.value,
-        fullPriceCents: parseCurrency(pFullPrice.value),
-        amount: Number(pAmount.value),
-        amountUnit: pAmountUnit.value,
-        unitPriceCents: parseCurrency(pUnitPrice.value),
-        check: pCheck.checked,
-        groceryDate: toTimestamp(pGroceryDate.value)
-      });
-      status.innerText = "Product adicionado!";
+    const statusEl = document.getElementById("status");
+
+    try {
+      const productData = {
+        name: document.getElementById("pName").value.trim(),
+        category: document.getElementById("pCategory").value.trim(),
+        fullPriceCents: parseCurrency(document.getElementById("pFullPrice").value.trim()),
+        amount: Number(document.getElementById("pAmount").value),
+        amountUnit: document.getElementById("pAmountUnit").value.trim(),
+        unitPriceCents: parseCurrency(document.getElementById("pUnitPrice").value.trim()),
+        check: document.getElementById("pCheck").checked,
+        groceryDate: toTimestamp(document.getElementById("pGroceryDate").value)
+      };
+      console.log("Enviando Product:", productData);
+      await db.collection("Products").add(productData);
+      statusEl.innerText = "Product adicionado!";
       e.target.reset();
-    } catch(err){ status.innerText = "Erro: "+err.message; }
+    } catch(err){
+      console.error(err);
+      statusEl.innerText = "Erro: "+err.message;
+    }
   };
 </script>
 
