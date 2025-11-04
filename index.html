@@ -1,157 +1,150 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Controle Doméstico</title>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 20px;
-        background: #f7f7f7;
-        color: #222;
-        max-width: 600px;
-        margin: auto;
-      }
-      input, button {
-        display: block;
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0;
-        box-sizing: border-box;
-      }
-      button {
-        background: #4caf50;
-        color: white;
-        border: none;
-        cursor: pointer;
-      }
-      button:hover {
-        background: #43a047;
-      }
-      #logout {
-        margin-top: 20px;
-        display: none;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Controle Doméstico</h1>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HouseHub - Controle Doméstico</title>
 
-    <div id="loginDiv"></div>
-    <button id="logout">Sair</button>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.24.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.24.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.24.0/firebase-firestore.js"></script>
 
-    <div id="conteudo" style="display:none;">
-      <h2>Adicionar Groceries</h2>
-      <form id="groceriesForm">
-        <input type="text" id="gName" placeholder="Name" required />
-        <input type="text" id="gType" placeholder="Type" required />
-        <input type="date" id="gDate" required />
-        <input type="text" id="gTotalCost" placeholder="Total Cost" required />
-        <button type="submit">Adicionar</button>
-      </form>
+<style>
+body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background: #f7f7f7; }
+input, button, select { display: block; width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
+button { background: #4caf50; color: white; border: none; cursor: pointer; }
+button:hover { background: #43a047; }
+#login, #logout { margin-top: 20px; }
+</style>
+</head>
+<body>
 
-      <h2>Adicionar Product</h2>
-      <form id="productsForm">
-        <input type="text" id="pName" placeholder="Name" required />
-        <input type="text" id="pCategory" placeholder="Category" required />
-        <input type="text" id="pFullPrice" placeholder="Full Price" required />
-        <input type="number" id="pAmount" placeholder="Amount" required />
-        <input type="text" id="pAmountUnit" placeholder="Amount Unit" required />
-        <input type="text" id="pUnitPrice" placeholder="Unit Price" required />
-        <input type="text" id="pCheck" placeholder="Check" required />
-        <input type="date" id="pGroceryDate" required />
-        <button type="submit">Adicionar</button>
-      </form>
+<h1>HouseHub - Controle Doméstico</h1>
 
-      <p id="status"></p>
-    </div>
+<button id="login">Entrar com Google</button>
+<button id="logout" style="display:none;">Sair</button>
 
-    <script>
-      const CLIENT_ID = "1030002931432-lkae2h3ja2muhep356tc8bd91utiot4h.apps.googleusercontent.com";
-      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxGQQmTa5B5TtxAFjBms8UsogzfYWPIjnfmYPqNCpV7Y471NfmbDxJe5UazzbNHcYX7mA/exec";
-      let userEmail = null;
-      let userToken = null;
+<div id="conteudo" style="display:none;">
+  <h2>Adicionar Groceries</h2>
+  <form id="groceriesForm">
+    <input type="text" id="gName" placeholder="Name" required />
+    <select id="gType" required>
+      <option value="">Escolha o tipo</option>
+      <option value="Mercado">Mercado</option>
+      <option value="Padaria">Padaria</option>
+      <option value="Farmácia">Farmácia</option>
+    </select>
+    <input type="date" id="gDate" required />
+    <input type="text" id="gTotalCost" placeholder="Total Cost (ex: R$ 20,42)" required />
+    <button type="submit">Adicionar</button>
+  </form>
 
-      function handleCredentialResponse(response) {
-        const idToken = response.credential;
-        userToken = idToken;
+  <h2>Adicionar Product</h2>
+  <form id="productsForm">
+    <input type="text" id="pName" placeholder="Name" required />
+    <input type="text" id="pCategory" placeholder="Category" required />
+    <input type="text" id="pFullPrice" placeholder="Full Price (ex: R$ 20,42)" required />
+    <input type="number" id="pAmount" placeholder="Amount" required />
+    <input type="text" id="pAmountUnit" placeholder="Amount Unit" required />
+    <input type="text" id="pUnitPrice" placeholder="Unit Price (ex: R$ 20,42)" required />
+    <input type="checkbox" id="pCheck" /> Checked
+    <input type="date" id="pGroceryDate" required />
+    <button type="submit">Adicionar</button>
+  </form>
 
-        const payload = JSON.parse(atob(idToken.split(".")[1]));
-        userEmail = payload.email;
+  <p id="status"></p>
+</div>
 
-        document.getElementById("loginDiv").style.display = "none";
-        document.getElementById("logout").style.display = "block";
-        document.getElementById("conteudo").style.display = "block";
-      }
+<script>
+  // Config Firebase (substitua pelos seus valores)
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_PROJETO.firebaseapp.com",
+    projectId: "SEU_PROJETO",
+    storageBucket: "SEU_PROJETO.appspot.com",
+    messagingSenderId: "SEU_SENDER_ID",
+    appId: "SEU_APP_ID",
+    measurementId: "SEU_MEASUREMENT_ID"
+  };
 
-      window.onload = function () {
-        google.accounts.id.initialize({
-          client_id: CLIENT_ID,
-          callback: handleCredentialResponse,
-        });
+  // Inicializa Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-        google.accounts.id.renderButton(
-          document.getElementById("loginDiv"),
-          { theme: "outline", size: "large", text: "continue_with" }
-        );
+  // Login Google
+  const provider = new firebase.auth.GoogleAuthProvider();
 
-        google.accounts.id.prompt();
+  document.getElementById("login").onclick = async () => {
+    try {
+      await auth.signInWithPopup(provider);
+    } catch(e) { alert(e.message); }
+  };
 
-        document.getElementById("logout").addEventListener("click", () => {
-          google.accounts.id.disableAutoSelect();
-          userToken = null;
-          userEmail = null;
-          document.getElementById("loginDiv").style.display = "block";
-          document.getElementById("logout").style.display = "none";
-          document.getElementById("conteudo").style.display = "none";
-        });
-      };
+  document.getElementById("logout").onclick = async () => {
+    await auth.signOut();
+  };
 
-      async function sendData(action, body) {
-        if (!userToken) {
-          alert("Faça login primeiro.");
-          return;
-        }
+  auth.onAuthStateChanged(user => {
+    if(user){
+      document.getElementById("login").style.display = "none";
+      document.getElementById("logout").style.display = "block";
+      document.getElementById("conteudo").style.display = "block";
+    } else {
+      document.getElementById("login").style.display = "block";
+      document.getElementById("logout").style.display = "none";
+      document.getElementById("conteudo").style.display = "none";
+    }
+  });
 
-        const payload = { ...body, action, token: userToken };
-        const res = await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+  // Converte valor em R$ para centavos
+  function parseCurrency(value){
+    return Math.round(parseFloat(value.replace("R$", "").replace(",", ".")) * 100);
+  }
 
-        const data = await res.json();
-        document.getElementById("status").innerText = data.result || data.error || "Erro desconhecido";
-      }
+  // Converte input date para Timestamp
+  function toTimestamp(value){
+    return firebase.firestore.Timestamp.fromDate(new Date(value));
+  }
 
-      document.getElementById("groceriesForm").onsubmit = (e) => {
-        e.preventDefault();
-        sendData("addGroceries", {
-          name: gName.value,
-          type: gType.value,
-          date: gDate.value,
-          totalCost: gTotalCost.value,
-        });
-        e.target.reset();
-      };
+  // Envia Groceries
+  document.getElementById("groceriesForm").onsubmit = async (e)=>{
+    e.preventDefault();
+    try{
+      await db.collection("Groceries").add({
+        name: document.getElementById("gName").value,
+        type: document.getElementById("gType").value,
+        date: toTimestamp(document.getElementById("gDate").value),
+        totalCostCents: parseCurrency(document.getElementById("gTotalCost").value)
+      });
+      document.getElementById("status").innerText = "Groceries adicionada!";
+      e.target.reset();
+    } catch(err){
+      document.getElementById("status").innerText = "Erro: "+err.message;
+    }
+  };
 
-      document.getElementById("productsForm").onsubmit = (e) => {
-        e.preventDefault();
-        sendData("addProduct", {
-          name: pName.value,
-          category: pCategory.value,
-          fullPrice: pFullPrice.value,
-          amount: pAmount.value,
-          amountUnit: pAmountUnit.value,
-          unitPrice: pUnitPrice.value,
-          check: pCheck.value,
-          groceryDate: pGroceryDate.value,
-        });
-        e.target.reset();
-      };
-    </script>
-  </body>
+  // Envia Product
+  document.getElementById("productsForm").onsubmit = async (e)=>{
+    e.preventDefault();
+    try{
+      await db.collection("Products").add({
+        name: document.getElementById("pName").value,
+        category: document.getElementById("pCategory").value,
+        fullPriceCents: parseCurrency(document.getElementById("pFullPrice").value),
+        amount: Number(document.getElementById("pAmount").value),
+        amountUnit: document.getElementById("pAmountUnit").value,
+        unitPriceCents: parseCurrency(document.getElementById("pUnitPrice").value),
+        check: document.getElementById("pCheck").checked,
+        groceryDate: toTimestamp(document.getElementById("pGroceryDate").value)
+      });
+      document.getElementById("status").innerText = "Product adicionado!";
+      e.target.reset();
+    } catch(err){
+      document.getElementById("status").innerText = "Erro: "+err.message;
+    }
+  };
+</script>
+</body>
 </html>
