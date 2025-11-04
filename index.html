@@ -57,23 +57,21 @@ button:hover { background: #43a047; }
 </div>
 
 <script>
-  // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+  // Config Firebase
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_PROJETO.firebaseapp.com",
+    projectId: "SEU_PROJETO",
+    storageBucket: "SEU_PROJETO.appspot.com",
+    messagingSenderId: "SEU_SENDER_ID",
+    appId: "SEU_APP_ID"
+  };
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyA_CkIgswx9DClgDI6UbWJ8JBH2j8Qndbw",
-  authDomain: "househub-ba60c.firebaseapp.com",
-  projectId: "househub-ba60c",
-  storageBucket: "househub-ba60c.firebasestorage.app",
-  messagingSenderId: "799328107995",
-  appId: "1:799328107995:web:5d469a48ed60a0e479fbfe"
-};
+  // Inicializa Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
 
   // Login Google
   const provider = new firebase.auth.GoogleAuthProvider();
