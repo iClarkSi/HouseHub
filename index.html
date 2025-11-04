@@ -3,24 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HouseHub - Controle Doméstico</title>
+<title>House Hub</title>
 
 <!-- Firebase Compat SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-<style>
-body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background: #f7f7f7; }
-input, button, select { display: block; width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
-button { background: #4caf50; color: white; border: none; cursor: pointer; }
-button:hover { background: #43a047; }
-#login, #logout { margin-top: 20px; }
-</style>
+<link rel="stylesheet" href="styles.css">
+
 </head>
 <body>
 
-<h1>HouseHub - Controle Doméstico</h1>
+<h1>House Hub</h1>
 
 <button id="login">Entrar com Google</button>
 <button id="logout" style="display:none;">Sair</button>
@@ -59,20 +54,7 @@ button:hover { background: #43a047; }
 </div>
 
 <script>
-  // Inicializa Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyA_CkIgswx9DClgDI6UbWJ8JBH2j8Qndbw",
-    authDomain: "househub-ba60c.firebaseapp.com",
-    projectId: "househub-ba60c",
-    storageBucket: "househub-ba60c.appspot.com",
-    messagingSenderId: "799328107995",
-    appId: "1:799328107995:web:5d469a48ed60a0e479fbfe"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  const provider = new firebase.auth.GoogleAuthProvider();
+  
 
   // Login / Logout
   document.getElementById("login").onclick = async () => { try { await auth.signInWithPopup(provider); } catch(e){ alert(e.message); } };
@@ -159,5 +141,6 @@ button:hover { background: #43a047; }
     }
   };
 </script>
+<script type="module" src="main.js"></script>
 </body>
 </html>
