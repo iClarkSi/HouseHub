@@ -54,7 +54,9 @@
 </div>
 <script type="module" src="main.js"></script>
 <script>
-  
+  import { initializeFirebase } from "./js/components/DBConnection/firebase.js";
+
+  initializeFirebase();
 
   // Login / Logout
   document.getElementById("login").onclick = async () => { try { await auth.signInWithPopup(provider); } catch(e){ alert(e.message); } };
