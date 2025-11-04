@@ -1,3 +1,3 @@
-import { initializeFirebase } from "./js/components/DBConnection/firebase.js";
+import { initializeFirebase } from "./js/utils.js";
 
 initializeFirebase();
