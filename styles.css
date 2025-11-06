@@ -1,5 +1,24 @@
-body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; background: #f7f7f7; }
-input, button, select { display: block; width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
-button { background: #4caf50; color: white; border: none; cursor: pointer; }
-button:hover { background: #43a047; }
-#login, #logout { margin-top: 20px; }
+@import './js/pages/pages.css';
+
+body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: auto;
+    background: #f1f1f9;
+    color: #16161B;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+button{
+    padding: 12px 24px;
+    font-size: 16px;
+    color: #f1f1f9;
+    background-color: #4285F4;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 16px;
+}

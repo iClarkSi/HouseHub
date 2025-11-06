@@ -1,0 +1,16 @@
+/* Minimal full-viewport container for Home
+   - apenas o necessário para ocupar a viewport inteira
+   - sem cores/decorações */
+.home-container {
+	position: fixed;
+	inset: 0; /* top:0; right:0; bottom:0; left:0 */
+	width: 100vw;
+	height: 100vh;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+}
+

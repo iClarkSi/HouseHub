@@ -5,9 +5,9 @@ import { Home } from "../Home/index.js";
 const { auth, provider } = initializeFirebase();
 
 export const Login = `
-  <div>
-    <h1>Login</h1>
-    <button id="loginBtn">Entrar com Google</button>
+  <div class="background">
+    <h1>House Hub</h1>
+    <button id="loginBtn">Entrar</button>
   </div>
 `;
 
